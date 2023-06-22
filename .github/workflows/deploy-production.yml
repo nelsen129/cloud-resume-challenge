@@ -31,7 +31,6 @@ jobs:
       - name: Setup Terraform variables
         run: |-
           cat <<EOT > terraform.tfvars
-
           accounts = {"${{ secrets.AWS_ACCOUNTS }}"}
           EOT
 
