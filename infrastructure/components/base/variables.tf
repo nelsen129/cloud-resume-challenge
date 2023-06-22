@@ -10,10 +10,16 @@ variable "region" {
   default     = ""
 }
 
-variable "accounts" {
-  description = "Map of accounts to use, where the key is the account name and the value is the account email"
-  type        = map(string)
-  default     = {}
+variable "account_emails" {
+  description = "List of the account emails to use"
+  type        = list(string)
+  default     = []
+}
+
+variable "account_names" {
+  description = "List of the account names to use"
+  type        = list(string)
+  default     = []
 }
 
 variable "account_role_name" {
@@ -57,4 +63,3 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-

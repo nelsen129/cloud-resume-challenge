@@ -10,7 +10,8 @@ module "backend" {
 module "accounts" {
   source = "../../modules/accounts"
 
-  accounts = var.accounts
+  account_names  = var.account_names
+  account_emails = var.account_emails
 
   role_name         = var.account_role_name
   close_on_deletion = var.account_close_on_deletion
@@ -101,4 +102,3 @@ module "user_role_prod" {
 
   tags = var.tags
 }
-

@@ -7,10 +7,10 @@ resource "aws_organizations_organization" "this" {
 }
 
 resource "aws_organizations_account" "this" {
-  for_each = var.accounts
+  count = length(var.account_emails)
 
-  name  = each.key
-  email = each.value
+  name  = var.account_names[count.index]
+  email = var.account_emails[count.index]
 
   close_on_deletion = var.close_on_deletion
   role_name         = var.role_name
@@ -21,4 +21,3 @@ resource "aws_organizations_account" "this" {
     ignore_changes = [role_name]
   }
 }
-
