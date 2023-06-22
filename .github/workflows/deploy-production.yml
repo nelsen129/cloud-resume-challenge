@@ -16,7 +16,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: terraform/components/base
+        working-directory: infrastructure/components/base
 
     steps:
       - name: Git clone the rpository
@@ -30,7 +30,7 @@ jobs:
 
       - name: Setup Terraform variables
         run: |-
-          cat <<EOT >> terraform.tfvars
+          cat <<EOT >> "../../environments/base.tfvars"
 
           accounts = {"${{ secrets.AWS_ACCOUNTS }}"}
           EOT
@@ -46,4 +46,3 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false -var-file="../../environments/base.tfvars"
-
