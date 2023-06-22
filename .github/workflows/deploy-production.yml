@@ -30,7 +30,7 @@ jobs:
 
       - name: Run aws s3 list-buckets
         run: |-
-          aws s3api list-buckets
+          aws s3 list-buckets
 
       - name: Setup Terraform variables
         run: |-
