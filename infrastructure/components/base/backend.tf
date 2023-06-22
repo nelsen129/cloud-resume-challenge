@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket         = "terraform-aws-deployment-state-bucket"
-    dynamodb_table = "terraform-aws-deployment-dynamodb-lock-state"
+    bucket         = "cloud-resume-challenge-state-bucket"
+    dynamodb_table = "cloud-resume-challenge-dynamodb-lock-state"
     region         = "us-east-1"
   }
 }
