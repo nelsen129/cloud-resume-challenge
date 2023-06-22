@@ -28,11 +28,6 @@ jobs:
           role-to-assume: "${{ secrets.AWS_MANAGEMENT_ROLE }}"
           aws-region: us-east-1
 
-      - name: Tree
-        run: |-
-          tree
-          tree ../..
-
       - name: Run aws s3 list-buckets
         run: |-
           aws s3api list-buckets
