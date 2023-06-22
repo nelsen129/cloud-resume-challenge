@@ -28,6 +28,9 @@ jobs:
           role-to-assume: "${{ secrets.AWS_MANAGEMENT_ROLE }}"
           aws-region: us-east-1
 
+      - name: Setup latest Terraform version
+        uses: hashicorp/setup-terraform@v2
+
       - name: Setup Terraform variables
         run: |-
           cat <<EOT > terraform.tfvars
