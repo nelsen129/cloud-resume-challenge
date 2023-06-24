@@ -34,7 +34,7 @@ jobs:
         run: terraform fmt -check
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=dev-frontend/terraform.tfstate"
+        run: terraform init -backend-config="key=dev-${{ github.head_ref }}-frontend/terraform.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
