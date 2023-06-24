@@ -18,4 +18,3 @@ tags = {
   project     = "cloud-resume-challenge"
   environment = "base"
 }
-

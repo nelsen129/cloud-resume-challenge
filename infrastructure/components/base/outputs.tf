@@ -32,4 +32,3 @@ output "account_ids" {
   description = "IDs of the managed accounts"
   value       = module.accounts.account_ids
 }
-

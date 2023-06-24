@@ -12,4 +12,3 @@ output "dynamodb_table_id" {
   description = "The table id of the DynamoDB table"
   value       = module.dynamodb_backend.dynamodb_table_id
 }
-

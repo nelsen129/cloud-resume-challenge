@@ -22,4 +22,3 @@ output "account_ids" {
   description = "IDs of the managed accounts"
   value       = resource.aws_organizations_account.this[*].id
 }
-

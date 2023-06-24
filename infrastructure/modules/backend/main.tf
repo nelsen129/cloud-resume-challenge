@@ -43,4 +43,3 @@ module "dynamodb_backend" {
 
   tags = var.tags
 }
-

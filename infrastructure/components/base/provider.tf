@@ -28,4 +28,3 @@ provider "aws" {
     role_arn = "arn:aws:iam::${module.accounts.account_ids[2]}:role/${var.account_role_name}"
   }
 }
-

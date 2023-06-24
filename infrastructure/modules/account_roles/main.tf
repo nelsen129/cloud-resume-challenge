@@ -28,4 +28,3 @@ resource "aws_iam_role_policy_attachment" "this" {
   role       = aws_iam_role.this.name
   policy_arn = var.power_user_access ? data.aws_iam_policy.PowerUserAccess.arn : data.aws_iam_policy.ReadOnlyAccess.arn
 }
-
