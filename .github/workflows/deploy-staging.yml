@@ -2,6 +2,8 @@ name: 'deploy-staging'
 
 on:
   push:
+    branches:
+      - main
 
 permissions:
   id-token: write
