@@ -1,7 +1,11 @@
 name: 'deploy-development'
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
 
 permissions:
   id-token: write
