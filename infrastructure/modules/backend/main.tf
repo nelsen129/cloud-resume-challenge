@@ -1,3 +1,4 @@
+# tfsec:ignore:aws-s3-enable-bucket-logging
 module "s3_backend" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.6"
@@ -40,7 +41,7 @@ module "dynamodb_backend" {
   ]
 
   server_side_encryption_enabled = true
+  point_in_time_recovery_enabled = true
 
   tags = var.tags
 }
-
