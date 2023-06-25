@@ -182,7 +182,11 @@ data "aws_route53_zone" "this" {
 resource "aws_route53_record" "cloudfront" {
   zone_id = data.aws_route53_zone.this.id
   name    = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 63), "-")}.${var.hostname}" : var.hostname
-  type    = "CNAME"
-  ttl     = "300"
-  records = [module.cloudfront.cloudfront_distribution_domain_name]
+  type    = "A"
+
+  alias {
+    name                   = module.cloudfront.cloudfront_distribution_domain_name
+    zone_id                = module.cloudfront.cloudfront_distribution_hosted_zone_id
+    evaluate_target_health = true
+  }
 }
