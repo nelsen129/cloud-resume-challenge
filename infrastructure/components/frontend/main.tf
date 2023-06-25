@@ -124,7 +124,7 @@ module "cloudfront" {
 
   create_origin_access_control = true
   origin_access_control = {
-    "s3_oac" = {
+    "s3-oac-${var.name}-${var.environment}" = {
       description      = "CloudFront access to S3"
       origin_type      = "s3"
       signing_behavior = "always"
@@ -135,12 +135,12 @@ module "cloudfront" {
   origin = {
     s3_oac = {
       domain_name           = module.s3_bucket.s3_bucket_bucket_domain_name
-      origin_access_control = "s3_oac"
+      origin_access_control = "s3-oac-${var.name}-${var.environment}"
     }
   }
 
   default_cache_behavior = {
-    target_origin_id       = "s3_oac"
+    target_origin_id       = "s3-oac-${var.name}-${var.environment}"
     viewer_protocol_policy = "allow-all"
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
     cached_methods         = ["GET", "HEAD"]
