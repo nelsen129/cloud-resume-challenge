@@ -1,8 +1,3 @@
-moved {
-  from = module.s3_backend
-  to   = module.s3_bucket
-}
-
 data "aws_caller_identity" "current" {}
 
 resource "random_pet" "this" {
