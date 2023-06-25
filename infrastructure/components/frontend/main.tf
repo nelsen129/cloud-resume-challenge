@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "kmskey_admin" {
 }
 
 resource "aws_iam_role" "kmskey_admin" {
-  name = trim("${var.name}-${var.environment}-kmskey-admin-role", "-")
+  name = trim(substr("${var.name}-${var.environment}-kmskey-admin-role", 0, 63), "-")
 
   assume_role_policy = data.aws_iam_policy_document.kmskey_admin.json
   managed_policy_arns = [
