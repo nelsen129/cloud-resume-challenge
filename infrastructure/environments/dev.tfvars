@@ -1,4 +1,4 @@
-name = "cloud-resume-challenge"
+name = "nelsen129-cloud-resume-challenge"
 
 region = "us-west-1"
 
