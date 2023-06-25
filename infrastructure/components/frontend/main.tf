@@ -100,13 +100,26 @@ module "s3_bucket" {
   tags = var.tags
 }
 
-resource "aws_s3_object" "website" {
-  for_each = fileset("../../../frontend/", "**")
+module "template_files" {
+  source  = "hashicorp/dir/template"
+  version = "~> 1.0"
 
-  bucket = module.s3_bucket.s3_bucket_id
-  key    = each.value
-  source = "../../../frontend/${each.value}"
-  etag   = filemd5("../../../frontend/${each.value}")
+  base_dir = "../../../frontend"
+}
+
+resource "aws_s3_object" "website" {
+  for_each = module.template_files.files
+
+  bucket       = module.s3_bucket.s3_bucket_id
+  key          = each.key
+  content_type = each.value.content_type
+
+  source  = each.value.source_path
+  content = each.value.content
+
+  etag = each.value.digests.md5
+
+  tags = var.tags
 }
 
 # tfsec:ignore:aws-cloudfront-use-secure-tls-policy tfsec:ignore:aws-cloudfront-enable-logging
