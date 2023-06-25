@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "kms_key" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = module.cloudfront.cloudfront_distribution_arn
+      values   = [module.cloudfront.cloudfront_distribution_arn]
     }
   }
 }
