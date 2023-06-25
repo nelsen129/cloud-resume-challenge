@@ -10,7 +10,7 @@ resource "random_pet" "this" {
 data "aws_iam_policy_document" "kms_key" {
   statement {
     sid    = "Allow Cloudfront access to the key"
-    effect = "allow"
+    effect = "Allow"
 
     principals {
       type        = "Service"
