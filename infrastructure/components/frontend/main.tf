@@ -134,7 +134,7 @@ module "cloudfront" {
 
   origin = {
     trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-") = {
-      domain_name           = module.s3_bucket.s3_bucket_bucket_domain_name
+      domain_name           = module.s3_bucket.s3_bucket_bucket_regional_domain_name
       origin_access_control = trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-")
     }
   }
