@@ -62,20 +62,16 @@ resource "aws_kms_key_policy" "this" {
 }
 
 # tfsec:ignore:aws-s3-enable-bucket-logging
-# tfsec:ignore:aws-s3-block-public-acls
-# tfsec:ignore:aws-s3-block-public-policy
-# tfsec:ignore:aws-s3-ignore-public-acls
-# tfsec:ignore:aws-s3-no-public-buckets
 module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.6"
 
   bucket = trim(substr("${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 
   force_destroy = var.force_destroy
 
@@ -118,7 +114,8 @@ resource "aws_s3_object" "website" {
   tags = var.tags
 }
 
-# tfsec:ignore:aws-cloudfront-use-secure-tls-policy tfsec:ignore:aws-cloudfront-enable-logging
+# tfsec:ignore:aws-cloudfront-use-secure-tls-policy
+# tfsec:ignore:aws-cloudfront-enable-logging
 module "cloudfront" {
   source  = "terraform-aws-modules/cloudfront/aws"
   version = "~> 3.2"
