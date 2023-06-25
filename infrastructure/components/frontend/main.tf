@@ -62,20 +62,16 @@ resource "aws_kms_key_policy" "this" {
 }
 
 # tfsec:ignore:aws-s3-enable-bucket-logging
-# tfsec:ignore:aws-s3-block-public-acls
-# tfsec:ignore:aws-s3-block-public-policy
-# tfsec:ignore:aws-s3-ignore-public-acls
-# tfsec:ignore:aws-s3-no-public-buckets
 module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.6"
 
   bucket = trim(substr("${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 
   force_destroy = var.force_destroy
 
@@ -118,7 +114,8 @@ resource "aws_s3_object" "website" {
   tags = var.tags
 }
 
-# tfsec:ignore:aws-cloudfront-use-secure-tls-policy tfsec:ignore:aws-cloudfront-enable-logging
+# tfsec:ignore:aws-cloudfront-use-secure-tls-policy
+# tfsec:ignore:aws-cloudfront-enable-logging
 module "cloudfront" {
   source  = "terraform-aws-modules/cloudfront/aws"
   version = "~> 3.2"
@@ -127,7 +124,7 @@ module "cloudfront" {
 
   create_origin_access_control = true
   origin_access_control = {
-    "s3_oac" = {
+    trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-") = {
       description      = "CloudFront access to S3"
       origin_type      = "s3"
       signing_behavior = "always"
@@ -136,14 +133,14 @@ module "cloudfront" {
   }
 
   origin = {
-    s3_oac = {
-      domain_name           = module.s3_bucket.s3_bucket_bucket_domain_name
-      origin_access_control = "s3_oac"
+    trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-") = {
+      domain_name           = module.s3_bucket.s3_bucket_bucket_regional_domain_name
+      origin_access_control = trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-")
     }
   }
 
   default_cache_behavior = {
-    target_origin_id       = "s3_oac"
+    target_origin_id       = trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-")
     viewer_protocol_policy = "allow-all"
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
     cached_methods         = ["GET", "HEAD"]
