@@ -174,3 +174,15 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
   bucket = module.s3_bucket.s3_bucket_id
   policy = data.aws_iam_policy_document.s3_policy.json
 }
+
+data "aws_route53_zone" "this" {
+  name = "${var.hostname}."
+}
+
+resource "aws_route53_record" "cloudfront" {
+  zone_id = data.aws_route53_zone.this.id
+  name    = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 63), "-")}.${var.hostname}" : var.hostname
+  type    = "CNAME"
+  ttl     = "300"
+  records = [module.cloudfront.cloudfront_distribution_domain_name]
+}
