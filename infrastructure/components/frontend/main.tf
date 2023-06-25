@@ -75,7 +75,7 @@ module "cloudfront" {
   default_cache_behavior = {
     target_origin_id       = "s3_oac"
     viewer_protocol_policy = "allow-all"
-    allowed_methos         = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     query_string           = true
