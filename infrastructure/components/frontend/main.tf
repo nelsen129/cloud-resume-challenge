@@ -1,9 +1,14 @@
+moved {
+  from = module.s3_backend
+  to   = module.s3_bucket
+}
+
 resource "random_pet" "this" {
   length = 2
 }
 
 # tfsec:ignore:aws-s3-enable-bucket-logging
-module "s3_backend" {
+module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.6"
 
@@ -33,7 +38,7 @@ module "s3_backend" {
 resource "aws_s3_object" "website" {
   for_each = fileset("../../../frontend/", "**")
 
-  bucket = module.s3_backend.s3_bucket_id
+  bucket = module.s3_bucket.s3_bucket_id
   key    = each.value
   source = "../../../frontend/${each.value}"
   etag   = filemd5("../../../frontend/${each.value}")
@@ -58,6 +63,7 @@ module "cloudfront" {
 
   origin = {
     s3_oac = {
+      domain_name           = module.s3_bucket.s3_bucket_bucket_domain_name
       origin_access_control = "s3_oac"
     }
   }
