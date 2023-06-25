@@ -3,11 +3,32 @@ moved {
   to   = module.s3_bucket
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "random_pet" "this" {
   length = 2
 }
 
 data "aws_iam_policy_document" "kms_key" {
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+        data.aws_caller_identity.current.arn
+      ]
+    }
+
+    actions = [
+      "kms:*"
+    ]
+
+    resources = ["*"]
+  }
+
   statement {
     sid    = "Allow Cloudfront access to the key"
     effect = "Allow"
