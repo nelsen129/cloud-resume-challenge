@@ -1,5 +1,9 @@
 data "aws_caller_identity" "current" {}
 
+data "aws_canonical_user_id" "current" {}
+
+data "aws_cloudfront_log_delivery_canonical_user_id" "cloudfront" {}
+
 resource "random_pet" "this" {
   length = 2
 }
@@ -74,6 +78,17 @@ module "s3_bucket_logs" {
   attach_require_latest_tls_policy      = true
 
   force_destroy = var.force_destroy
+
+  acl = null
+  grant = [{
+    type       = "CanonicalUser"
+    permission = "FULL_CONTROL"
+    id         = data.aws_canonical_user_id.current.id
+    }, {
+    type       = "CanonicalUser"
+    permission = "FULL_CONTROL"
+    id         = data.aws_cloudfront_log_delivery_canonical_user_id.cloudfront.id
+  }]
 
   versioning = {
     status     = true
@@ -157,7 +172,7 @@ resource "aws_s3_object" "website" {
   tags = var.tags
 }
 
-# tfsec:ignore:aws-cloudfront-use-secure-tls-policy tfsec:ignore:aws-cloudfront-enable-logging
+# tfsec:ignore:aws-cloudfront-use-secure-tls-policy
 module "cloudfront" {
   source  = "terraform-aws-modules/cloudfront/aws"
   version = "~> 3.2"
@@ -172,6 +187,11 @@ module "cloudfront" {
       signing_behavior = "always"
       signing_protocol = "sigv4"
     }
+  }
+
+  logging_config = {
+    bucket = module.s3_bucket_logs.s3_bucket_bucket_domain_name
+    prefix = "cloudfront"
   }
 
   origin = {
