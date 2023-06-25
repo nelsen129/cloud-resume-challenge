@@ -80,6 +80,8 @@ module "cloudfront" {
     compress               = true
     query_string           = true
   }
+
+  tags = var.tags
 }
 
 data "aws_iam_policy_document" "s3_policy" {
