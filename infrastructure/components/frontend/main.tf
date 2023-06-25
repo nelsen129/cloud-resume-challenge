@@ -38,3 +38,27 @@ resource "aws_s3_object" "website" {
   source = "../../../frontend/${each.value}"
   etag   = filemd5("../../../frontend/${each.value}")
 }
+
+# tfsec:ignore:aws-cloudfront-use-secure-tls-policy tfsec:ignore:aws-cloudfront-enable-logging
+module "cloudfront" {
+  source  = "terraform-aws-modules/cloudfront/aws"
+  version = "~> 3.2"
+
+  create_monitoring_subscription = true
+
+  create_origin_access_control = true
+  origin_access_control = {
+    "s3_oac" = {
+      description      = "CloudFront access to S3"
+      origin_type      = "s3"
+      signing_behavior = "always"
+      signing_protocol = "sigv4"
+    }
+  }
+
+  origin = {
+    s3_oac = {
+      origin_access_control = "s3_oac"
+    }
+  }
+}
