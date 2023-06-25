@@ -22,6 +22,12 @@ variable "environment" {
   default     = ""
 }
 
+variable "force_destroy" {
+  description = "Whether to set the force_destroy flag on certain resources. Should only be set in dev environments"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
