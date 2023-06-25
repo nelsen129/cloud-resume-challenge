@@ -2,8 +2,8 @@ data "aws_iam_policy" "ReadOnlyAccess" {
   arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
-data "aws_iam_policy" "PowerUserAccess" {
-  arn = "arn:aws:iam::aws:policy/PowerUserAccess"
+data "aws_iam_policy" "AdministratorAccess" {
+  arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 data "aws_iam_policy_document" "this" {
@@ -26,5 +26,5 @@ resource "aws_iam_role" "this" {
 
 resource "aws_iam_role_policy_attachment" "this" {
   role       = aws_iam_role.this.name
-  policy_arn = var.power_user_access ? data.aws_iam_policy.PowerUserAccess.arn : data.aws_iam_policy.ReadOnlyAccess.arn
+  policy_arn = var.power_user_access ? data.aws_iam_policy.AdministratorAccess.arn : data.aws_iam_policy.ReadOnlyAccess.arn
 }
