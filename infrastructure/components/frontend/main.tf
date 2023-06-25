@@ -68,10 +68,10 @@ module "s3_bucket_logs" {
 
   bucket = trim(substr("frontend-logs-${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  attach_lb_log_delivery_policy         = true
+  attach_access_log_delivery_policy     = true
+  attach_deny_insecure_transport_policy = true
+  attach_require_latest_tls_policy      = true
 
   force_destroy = var.force_destroy
 
@@ -87,6 +87,11 @@ module "s3_bucket_logs" {
       }
     }
   }
+
+  access_log_delivery_policy_source_accounts = [data.aws_caller_identity.current.account_id]
+  access_log_delivery_policy_source_buckets = [
+    "arn:aws:s3:::${trim(substr("${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")}"
+  ]
 
   tags = var.tags
 }
@@ -123,7 +128,8 @@ module "s3_bucket" {
   }
 
   logging = {
-    "target_bucket" = module.s3_bucket_logs.s3_bucket_id
+    target_bucket = module.s3_bucket_logs.s3_bucket_id
+    target_prefix = "log/"
   }
 
   tags = var.tags
