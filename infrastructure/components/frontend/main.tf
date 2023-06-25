@@ -7,7 +7,7 @@ module "s3_backend" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.6"
 
-  bucket = "${var.name}-${var.environment}-bucket-${random_pet.this}"
+  bucket = "${var.name}-${var.environment}-bucket-${random_pet.this.id}"
 
   block_public_acls       = true
   block_public_policy     = true
