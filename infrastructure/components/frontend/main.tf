@@ -77,6 +77,8 @@ module "s3_bucket" {
   ignore_public_acls      = false
   restrict_public_buckets = false
 
+  force_destroy = var.force_destroy
+
   versioning = {
     status     = true
     mfa_delete = false
