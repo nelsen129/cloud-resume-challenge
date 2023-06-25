@@ -1,7 +1,9 @@
 name: 'deploy-production'
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "*"
 
 permissions:
   id-token: write
