@@ -3,8 +3,102 @@ moved {
   to   = module.s3_bucket
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
 resource "random_pet" "this" {
   length = 2
+}
+
+data "aws_iam_policy_document" "kmskey_admin" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        data.aws_caller_identity.current.account_id
+      ]
+    }
+
+    actions = [
+      "sts:AssumeRole"
+    ]
+  }
+}
+
+resource "aws_iam_role" "kmskey_admin" {
+  name = trim("${var.name}-${var.environment}-kmskey-admin-role", "-")
+
+  assume_role_policy = data.aws_iam_policy_document.kmskey_admin.json
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser"
+  ]
+
+  tags = var.tags
+}
+
+module "kms" {
+  source  = "terraform-aws-modules/kms/aws"
+  version = "~> 1.5"
+
+  key_usage = "ENCRYPT_DECRYPT"
+
+  key_statements = [
+    {
+      sid    = "Enable IAM User Permissions"
+      effect = "Allow"
+
+      principals = [
+        {
+          type = "AWS"
+          identifiers = [
+            aws_iam_role.kmskey_admin.arn,
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+          ]
+        }
+      ]
+
+      actions = [
+        "kms:*"
+      ]
+
+      resources = ["*"]
+      }, {
+      sid    = "Allow access through S3 for all principals in the account that are authorized to use S3"
+      effect = "Allow"
+
+      principals = [
+        {
+          type        = "AWS"
+          identifiers = ["*"]
+        }
+      ]
+
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ]
+
+      resources = ["*"]
+
+      conditions = [
+        {
+          test     = "StringEquals"
+          variable = "kms:CallerAccount"
+          values   = [data.aws_caller_identity.current.account_id]
+          }, {
+          test     = "StringEquals"
+          variable = "kms:ViaService"
+          values   = ["s3.${data.aws_region.current.name}.amazonaws.com"]
+        }
+      ]
+    }
+  ]
 }
 
 # tfsec:ignore:aws-s3-enable-bucket-logging
@@ -31,7 +125,8 @@ module "s3_bucket" {
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
-        sse_algorithm = "aws:kms"
+        kms_master_key_id = module.kms.key_arn
+        sse_algorithm     = "aws:kms"
       }
     }
   }
