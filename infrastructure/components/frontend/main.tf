@@ -86,7 +86,7 @@ data "aws_iam_policy_document" "s3_policy" {
   # Origin Access Controls
   statement {
     actions   = ["s3:GetObject"]
-    resources = ["${module.s3_bucket.s3_bucket_arn}/*"]
+    resources = ["${module.s3_bucket.s3_bucket_arn}/static/*"]
 
     principals {
       type        = "Service"
