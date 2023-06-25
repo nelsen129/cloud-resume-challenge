@@ -29,3 +29,12 @@ module "s3_backend" {
 
   tags = var.tags
 }
+
+resource "aws_s3_object" "website" {
+  for_each = fileset("../../../frontend/", "**")
+
+  bucket = module.s3_backend.s3_bucket_id
+  key    = each.value
+  source = "../../../frontend/${each.value}"
+  etag   = filemd5("../../../frontend/${each.value}")
+}
