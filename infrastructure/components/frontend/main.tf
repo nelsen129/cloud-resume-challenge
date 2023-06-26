@@ -114,7 +114,6 @@ resource "aws_s3_object" "website" {
   tags = var.tags
 }
 
-# tfsec:ignore:aws-cloudfront-use-secure-tls-policy
 # tfsec:ignore:aws-cloudfront-enable-logging
 module "cloudfront" {
   source  = "terraform-aws-modules/cloudfront/aws"
@@ -148,6 +147,12 @@ module "cloudfront" {
     query_string           = true
   }
 
+  viewer_certificate = {
+    acm_certificate_arn      = module.acm.acm_certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+
   tags = var.tags
 }
 
@@ -177,6 +182,14 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
 
 data "aws_route53_zone" "this" {
   name = "${var.hostname}."
+}
+
+module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> 4.0"
+
+  domain_name = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 63), "-")}.${var.hostname}" : var.hostname
+  zone_id     = data.aws_route53_zone.this.id
 }
 
 resource "aws_route53_record" "cloudfront" {
