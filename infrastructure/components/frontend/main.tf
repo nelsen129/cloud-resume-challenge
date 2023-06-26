@@ -188,13 +188,13 @@ module "acm" {
   source  = "terraform-aws-modules/acm/aws"
   version = "~> 4.0"
 
-  domain_name = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 63), "-")}.${var.hostname}" : var.hostname
+  domain_name = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname
   zone_id     = data.aws_route53_zone.this.id
 }
 
 resource "aws_route53_record" "cloudfront" {
   zone_id = data.aws_route53_zone.this.id
-  name    = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 63), "-")}.${var.hostname}" : var.hostname
+  name    = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname
   type    = "A"
 
   alias {
