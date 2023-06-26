@@ -15,5 +15,5 @@ output "cloudfront_distribution_domain_name" {
 
 output "route53_record_name" {
   description = "Domain name of the created Route 53 record"
-  value       = aws_route53_record.cloudfront
+  value       = aws_route53_record.cloudfront.name
 }
