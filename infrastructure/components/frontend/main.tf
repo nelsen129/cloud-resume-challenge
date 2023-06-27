@@ -105,6 +105,7 @@ module "log_bucket" {
         sse_algorithm     = "aws:kms"
       }
     }
+    bucket_key_enabled = true
   }
 
   tags = var.tags
@@ -136,6 +137,7 @@ module "s3_bucket" {
         sse_algorithm     = "aws:kms"
       }
     }
+    bucket_key_enabled = true
   }
 
   tags = var.tags
