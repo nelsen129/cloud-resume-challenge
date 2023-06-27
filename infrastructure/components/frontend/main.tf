@@ -4,6 +4,10 @@ resource "random_pet" "this" {
   length = 2
 }
 
+locals {
+  domain_name = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname
+}
+
 data "aws_iam_policy_document" "kms_key" {
   statement {
     sid    = "Enable IAM User Permissions"
@@ -114,11 +118,12 @@ resource "aws_s3_object" "website" {
   tags = var.tags
 }
 
-# tfsec:ignore:aws-cloudfront-use-secure-tls-policy
 # tfsec:ignore:aws-cloudfront-enable-logging
 module "cloudfront" {
   source  = "terraform-aws-modules/cloudfront/aws"
   version = "~> 3.2"
+
+  aliases = [local.domain_name]
 
   create_monitoring_subscription = true
 
@@ -141,12 +146,30 @@ module "cloudfront" {
 
   default_cache_behavior = {
     target_origin_id       = trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-")
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     query_string           = true
   }
+
+  default_root_object = "index.html"
+
+  viewer_certificate = {
+    acm_certificate_arn      = module.acm.acm_certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+
+  custom_error_response = [{
+    error_code         = 404
+    response_code      = 404
+    response_page_path = "/errors/404.html"
+    }, {
+    error_code         = 403
+    response_code      = 403
+    response_page_path = "/errors/403.html"
+  }]
 
   tags = var.tags
 }
@@ -173,4 +196,32 @@ data "aws_iam_policy_document" "s3_policy" {
 resource "aws_s3_bucket_policy" "bucket_policy" {
   bucket = module.s3_bucket.s3_bucket_id
   policy = data.aws_iam_policy_document.s3_policy.json
+}
+
+data "aws_route53_zone" "this" {
+  name = "${var.hostname}."
+}
+
+module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> 4.0"
+
+  providers = {
+    aws = aws.us-east-1
+  }
+
+  domain_name = local.domain_name
+  zone_id     = data.aws_route53_zone.this.id
+}
+
+resource "aws_route53_record" "cloudfront" {
+  zone_id = data.aws_route53_zone.this.id
+  name    = local.domain_name
+  type    = "A"
+
+  alias {
+    name                   = module.cloudfront.cloudfront_distribution_domain_name
+    zone_id                = module.cloudfront.cloudfront_distribution_hosted_zone_id
+    evaluate_target_health = true
+  }
 }

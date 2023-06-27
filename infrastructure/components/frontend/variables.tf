@@ -22,6 +22,18 @@ variable "environment" {
   default     = ""
 }
 
+variable "hostname" {
+  description = "DNS hostname to expose the cloud deployment through"
+  type        = string
+  default     = ""
+}
+
+variable "add_environment_to_hostname" {
+  description = "If true, will expose the CloudFront deployment through a subdomain of the given hostname"
+  type        = bool
+  default     = false
+}
+
 variable "force_destroy" {
   description = "Whether to set the force_destroy flag on certain resources. Should only be set in dev environments"
   type        = bool
