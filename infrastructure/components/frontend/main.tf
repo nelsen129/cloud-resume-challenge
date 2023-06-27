@@ -70,9 +70,12 @@ resource "aws_kms_key_policy" "this" {
 }
 
 # tfsec:ignore:aws-s3-enable-bucket-logging
+# tfsec:ignore:aws-s3-block-public-acls
 module "log_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.6"
+
+  block_public_acls = false
 
   bucket = trim(substr("logs-${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
   acl    = null
