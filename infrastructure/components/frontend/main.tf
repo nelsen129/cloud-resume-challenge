@@ -113,6 +113,8 @@ module "log_bucket" {
     bucket_key_enabled = true
   }
 
+  object_ownership = "BucketOwnerPreferred"
+
   tags = var.tags
 }
 
