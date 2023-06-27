@@ -4,6 +4,10 @@ resource "random_pet" "this" {
   length = 2
 }
 
+locals {
+  domain_name = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname
+}
+
 data "aws_iam_policy_document" "kms_key" {
   statement {
     sid    = "Enable IAM User Permissions"
@@ -119,6 +123,8 @@ module "cloudfront" {
   source  = "terraform-aws-modules/cloudfront/aws"
   version = "~> 3.2"
 
+  aliases = [local.domain_name]
+
   create_monitoring_subscription = true
 
   create_origin_access_control = true
@@ -192,15 +198,13 @@ module "acm" {
     aws = aws.us-east-1
   }
 
-  domain_name = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname
+  domain_name = local.domain_name
   zone_id     = data.aws_route53_zone.this.id
 }
 
-
-
 resource "aws_route53_record" "cloudfront" {
   zone_id = data.aws_route53_zone.this.id
-  name    = var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname
+  name    = local.domain_name
   type    = "A"
 
   alias {
