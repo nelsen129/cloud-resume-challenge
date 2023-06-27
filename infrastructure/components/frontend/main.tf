@@ -36,8 +36,11 @@ data "aws_iam_policy_document" "kms_key" {
     effect = "Allow"
 
     principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
+      type = "Service"
+      identifiers = [
+        "cloudfront.amazonaws.com",
+        "delivery.logs.amazonaws.com"
+      ]
     }
 
     actions = [
