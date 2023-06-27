@@ -153,6 +153,8 @@ module "cloudfront" {
     query_string           = true
   }
 
+  default_root_object = "index.html"
+
   viewer_certificate = {
     acm_certificate_arn      = module.acm.acm_certificate_arn
     ssl_support_method       = "sni-only"
