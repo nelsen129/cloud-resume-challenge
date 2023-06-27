@@ -1,5 +1,9 @@
 data "aws_caller_identity" "current" {}
 
+data "aws_cloudfront_log_delivery_canonical_user_id" "cloudfront" {}
+
+data "aws_canonical_user_id" "current" {}
+
 resource "random_pet" "this" {
   length = 2
 }
@@ -66,6 +70,44 @@ resource "aws_kms_key_policy" "this" {
 }
 
 # tfsec:ignore:aws-s3-enable-bucket-logging
+module "log_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> 3.6"
+
+  bucket = trim(substr("logs-${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
+  acl    = null
+  grant = [{
+    type       = "CanonicalUser"
+    permission = "FULL_CONTROL"
+    id         = data.aws_canonical_user_id.current.id
+    }, {
+    type       = "CanonicalUser"
+    permission = "FULL_CONTROL"
+    id         = data.aws_cloudfront_log_delivery_canonical_user_id.cloudfront.id
+    # Ref. https://github.com/terraform-providers/terraform-provider-aws/issues/12512
+    # Ref. https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html
+  }]
+
+  force_destroy = var.force_destroy
+
+  versioning = {
+    status     = true
+    mfa_delete = false
+  }
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        kms_master_key_id = aws_kms_key.this.id
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
+  tags = var.tags
+}
+
+# tfsec:ignore:aws-s3-enable-bucket-logging
 module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.6"
@@ -118,7 +160,6 @@ resource "aws_s3_object" "website" {
   tags = var.tags
 }
 
-# tfsec:ignore:aws-cloudfront-enable-logging
 module "cloudfront" {
   source  = "terraform-aws-modules/cloudfront/aws"
   version = "~> 3.2"
@@ -135,6 +176,11 @@ module "cloudfront" {
       signing_behavior = "always"
       signing_protocol = "sigv4"
     }
+  }
+
+  logging_config = {
+    bucket = module.log_bucket.s3_bucket_bucket_domain_name
+    prefix = "cloudfront"
   }
 
   origin = {
