@@ -168,7 +168,7 @@ module "cloudfront" {
     }, {
     error_code         = 403
     response_code      = 403
-    response_path_path = "/errors/403.html"
+    response_page_path = "/errors/403.html"
   }]
 
   tags = var.tags
