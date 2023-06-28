@@ -1,0 +1,3 @@
+# Files that we're not ready to format yet
+*.yml
+*.yaml
