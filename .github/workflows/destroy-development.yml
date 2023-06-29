@@ -1,4 +1,4 @@
-name: 'destroy-development'
+name: "destroy-development"
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   development-destroy-frontend:
-    name: 'destroy-development-frontend'
+    name: "destroy-development-frontend"
     runs-on: ubuntu-latest
     environment: development
 
