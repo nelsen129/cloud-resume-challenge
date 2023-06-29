@@ -8,5 +8,5 @@
     "es6": true
   },
 
-  "extends": ["prettier"]
+  "extends": ["next", "prettier"]
 }

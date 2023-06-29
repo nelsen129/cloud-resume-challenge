@@ -100,7 +100,7 @@ module "template_files" {
   source  = "hashicorp/dir/template"
   version = "~> 1.0"
 
-  base_dir = "../../../frontend"
+  base_dir = "../../../frontend/out"
 }
 
 resource "aws_s3_object" "website" {

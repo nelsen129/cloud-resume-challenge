@@ -12,10 +12,37 @@ permissions:
   contents: read
 
 jobs:
+  development-build-frontend:
+    name: "build-development-frontend"
+    runs-on: ubuntu-latest
+    environment: development
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: frontend
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '19'
+
+      - name: NPM ci
+        run: npm ci
+
+      - name: Build frontend code
+        run: npm run build
+
   development-deploy-frontend:
     name: "deploy-development-frontend"
     runs-on: ubuntu-latest
     environment: development
+    needs:
+      - development-build-frontend
 
     defaults:
       run:
