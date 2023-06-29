@@ -77,13 +77,12 @@ resource "aws_kms_key_policy" "this" {
 # tfsec:ignore:aws-s3-ignore-public-acls
 module "log_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 3.6"
+  version = "~> 3.14"
 
-  block_public_acls  = false
-  ignore_public_acls = false
+  bucket                   = trim(substr("logs-${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
 
-  bucket = trim(substr("logs-${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
-  acl    = null
   grant = [{
     type       = "CanonicalUser"
     permission = "FULL_CONTROL"
@@ -113,9 +112,9 @@ module "log_bucket" {
     bucket_key_enabled = true
   }
 
-  control_object_ownership = true
-
-  object_ownership = "BucketOwnerPreferred"
+  owner = {
+    id = data.aws_canonical_user_id.current.id
+  }
 
   tags = var.tags
 }
@@ -123,7 +122,7 @@ module "log_bucket" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 3.6"
+  version = "~> 3.14"
 
   bucket = trim(substr("${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
 
