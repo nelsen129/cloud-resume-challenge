@@ -1,4 +1,4 @@
-name: 'deploy-production'
+name: "deploy-production"
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   production-deploy-base:
-    name: 'deploy-production-base'
+    name: "deploy-production-base"
     runs-on: ubuntu-latest
     environment: production
 
@@ -54,7 +54,7 @@ jobs:
         run: terraform apply -auto-approve -input=false -var-file="../../environments/base.tfvars"
 
   production-deploy-frontend:
-    name: 'deploy-production-frontend'
+    name: "deploy-production-frontend"
     runs-on: ubuntu-latest
     environment: production
 
