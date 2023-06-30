@@ -29,7 +29,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '19'
+          node-version: "19"
 
       - name: NPM ci
         run: npm ci
@@ -63,6 +63,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: frontend-build
+          path: frontend/out
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
