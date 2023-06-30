@@ -37,6 +37,12 @@ jobs:
       - name: Build frontend code
         run: npm run build
 
+      - name: Archive frontend code build
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/out
+
   development-deploy-frontend:
     name: "deploy-development-frontend"
     runs-on: ubuntu-latest
@@ -52,6 +58,11 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
