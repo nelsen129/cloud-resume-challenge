@@ -32,6 +32,26 @@ data "aws_iam_policy_document" "kms_key" {
   }
 
   statement {
+    sid    = "Allow Cloudfront logs access to the key"
+    effect = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "delivery.logs.amazonaws.com",
+      ]
+    }
+
+    actions = [
+      "kms:Decrypt",
+      "kms:Encrypt",
+      "kms:GenerateDataKey*"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
     sid    = "Allow Cloudfront access to the key"
     effect = "Allow"
 
@@ -39,7 +59,6 @@ data "aws_iam_policy_document" "kms_key" {
       type = "Service"
       identifiers = [
         "cloudfront.amazonaws.com",
-        "delivery.logs.amazonaws.com"
       ]
     }
 
