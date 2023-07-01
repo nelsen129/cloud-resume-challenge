@@ -100,7 +100,7 @@ module "log_bucket" {
 
   bucket                   = trim(substr("logs-${var.name}-${var.environment}-bucket-${random_pet.this.id}", 0, 63), "-")
   control_object_ownership = true
-  object_ownership         = "ObjectWriter"
+  object_ownership         = "BucketOwnerPreferred"
 
   grant = [{
     type       = "CanonicalUser"
@@ -124,8 +124,7 @@ module "log_bucket" {
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
-        kms_master_key_id = aws_kms_key.this.id
-        sse_algorithm     = "aws:kms"
+        sse_algorithm = "AES256"
       }
     }
     bucket_key_enabled = true
