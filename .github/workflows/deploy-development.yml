@@ -40,7 +40,7 @@ jobs:
       - name: Archive frontend code build
         uses: actions/upload-artifact@v3
         with:
-          name: frontend-build
+          name: frontend-build-dev-${{ github.head_ref }}
           path: frontend/out
 
   development-deploy-frontend:
@@ -62,7 +62,7 @@ jobs:
       - name: Download frontend build
         uses: actions/download-artifact@v3
         with:
-          name: frontend-build
+          name: frontend-build-dev-${{ github.head_ref }}
           path: frontend/out
 
       - name: Configure aws credentials
