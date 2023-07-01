@@ -12,10 +12,43 @@ permissions:
   contents: read
 
 jobs:
+  development-build-frontend:
+    name: "build-development-frontend"
+    runs-on: ubuntu-latest
+    environment: development
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: frontend
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "19"
+
+      - name: NPM ci
+        run: npm ci
+
+      - name: Build frontend code
+        run: npm run build
+
+      - name: Archive frontend code build
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/out
+
   development-deploy-frontend:
     name: "deploy-development-frontend"
     runs-on: ubuntu-latest
     environment: development
+    needs:
+      - development-build-frontend
 
     defaults:
       run:
@@ -25,6 +58,12 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/out
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1

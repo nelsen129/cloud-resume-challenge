@@ -100,7 +100,7 @@ module "template_files" {
   source  = "hashicorp/dir/template"
   version = "~> 1.0"
 
-  base_dir = "../../../frontend"
+  base_dir = "../../../frontend/out"
 }
 
 resource "aws_s3_object" "website" {
@@ -165,10 +165,6 @@ module "cloudfront" {
     error_code         = 404
     response_code      = 404
     response_page_path = "/errors/404.html"
-    }, {
-    error_code         = 403
-    response_code      = 403
-    response_page_path = "/errors/403.html"
   }]
 
   tags = var.tags
