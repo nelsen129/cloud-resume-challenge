@@ -45,6 +45,8 @@ jobs:
     name: "deploy-staging-frontend"
     runs-on: ubuntu-latest
     environment: staging
+    needs:
+      - staging-build-frontend
 
     defaults:
       run:
