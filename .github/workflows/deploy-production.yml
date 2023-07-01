@@ -45,6 +45,8 @@ jobs:
     name: "deploy-production-base"
     runs-on: ubuntu-latest
     environment: production
+    needs:
+      - production-build-frontend
 
     defaults:
       run:
