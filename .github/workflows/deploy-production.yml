@@ -24,12 +24,6 @@ jobs:
       - name: Git clone the rpository
         uses: actions/checkout@v3
 
-      - name: Download frontend build
-        uses: actions/download-artifact@v3
-        with:
-          name: frontend-build-prod
-          path: frontend/out
-
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -105,6 +99,12 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build-prod
+          path: frontend/out
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
