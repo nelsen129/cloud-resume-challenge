@@ -123,3 +123,35 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false -var-file="../../environments/prod.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}"
+
+  production-deploy-backend:
+    name: "deploy-production-backend"
+    runs-on: ubuntu-latest
+    environment: production
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: infrastructure/components/backend
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: "${{ secrets.AWS_MANAGEMENT_ROLE }}"
+          aws-region: us-east-1
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=prod-backend/terraform.tfstate"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false -var-file="../../environments/prod.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}"
