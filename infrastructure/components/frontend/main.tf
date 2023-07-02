@@ -187,7 +187,7 @@ resource "aws_s3_object" "website" {
   for_each = module.template_files.files
 
   bucket       = module.s3_bucket.s3_bucket_id
-  key          = each.key
+  key          = each.key == "index.html" ? "index.html" : trimsuffix(each.key, ".html")
   content_type = each.value.content_type
 
   source  = each.value.source_path
