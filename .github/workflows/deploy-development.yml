@@ -83,6 +83,40 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
 
+  development-build-backend:
+    name: "build-development-backend"
+    runs-on: ubuntu-latest
+    environment: development
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend/views/get
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+
+      - name: Install dependencies
+        run: go get .
+
+      - name: Go build
+        run: GOOS=linux GOARCH=amd64 go build main.go
+
+      - name: Zip build
+        run: zip views_get.zip main
+
+      - name: Archive backend code build
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build-dev-${{ github.head_ref }}
+          path: backend/views/get/views_get.zip
+
   development-deploy-backend:
     name: "deploy-development-backend"
     runs-on: ubuntu-latest
@@ -96,6 +130,12 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
+
+      - name: Download backend build
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build-dev-${{ github.head_ref }}
+          path: backend/views/get/views_get.zip
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
