@@ -100,6 +100,10 @@ module "lambda_function_api" {
   handler       = "main"
   runtime       = "go1.x"
 
+  environment_variables = {
+    "TABLE_NAME" = module.dynamodb_table.dynamodb_table_id
+  }
+
   create_package = false
   s3_existing_package = {
     bucket = module.lambda_build_s3_bucket.s3_bucket_id
