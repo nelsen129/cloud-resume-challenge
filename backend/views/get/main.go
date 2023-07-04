@@ -7,10 +7,11 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/aws/aws-xray-sdk-go/instrumentation/awsv2"
 	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
@@ -19,19 +20,20 @@ type Item struct {
 }
 
 func HandleRequest(ctx context.Context) (int, error) {
-	xray.Configure(xray.Config{LogLevel: "trace"})
-	sess := session.Must(session.NewSession())
-	dynamo := dynamodb.New(sess)
-	xray.AWS(dynamo.Client)
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		log.Fatalf("unable to load SDK config, %v", err)
+		return 0, err
+	}
+	awsv2.AWSV2Instrumentor(&cfg.APIOptions)
+	dynamo := dynamodb.NewFromConfig(cfg)
 
 	table_name := os.Getenv("TABLE_NAME")
 	log.Printf("Attempting to read view-count at stat from %s", table_name)
-	result, err := dynamo.GetItemWithContext(ctx, &dynamodb.GetItemInput{
+	result, err := dynamo.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: &table_name,
-		Key: map[string]*dynamodb.AttributeValue{
-			"stat": {
-				S: aws.String("view-count"),
-			},
+		Key: map[string]types.AttributeValue{
+			"stat": &types.AttributeValueMemberS{Value: "view-count"},
 		},
 	})
 
@@ -48,7 +50,7 @@ func HandleRequest(ctx context.Context) (int, error) {
 
 	item := Item{}
 
-	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
+	err = attributevalue.UnmarshalMap(result.Item, &item)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal Record, %v", err)
 		return 0, err
