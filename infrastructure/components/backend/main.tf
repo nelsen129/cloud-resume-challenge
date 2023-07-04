@@ -2,6 +2,10 @@ resource "random_pet" "this" {
   length = 2
 }
 
+locals {
+  api_info = toset(compact(split("\n", file("../../../backend/out/api_info.txt"))))
+}
+
 module "dynamodb_table" {
   source  = "terraform-aws-modules/dynamodb-table/aws"
   version = "~> 3.3"
@@ -53,13 +57,38 @@ module "lambda_build_s3_bucket" {
 }
 
 resource "aws_s3_object" "lambda_build" {
-  for_each = fileset("${path.module}/../../../backend/out", "*.zip")
+  for_each = local.api_info
 
   bucket = module.lambda_build_s3_bucket.s3_bucket_id
-  key    = each.key
-  source = "${path.module}/../../../backend/out/${each.key}"
+  key    = split(" ", each.key)[2]
+  source = "${path.module}/../../../backend/out/${split(" ", each.key)[2]}"
 
-  source_hash = filemd5("${path.module}/../../../backend/out/${each.key}")
+  source_hash = filemd5("${path.module}/../../../backend/out/${split(" ", each.key)[2]}")
+
+  tags = var.tags
+}
+
+module "lambda_function_api" {
+  for_each = local.api_info
+
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "~> 5.0"
+
+  function_name = trim(substr("${trimsuffix(split(" ", each.key)[2], ".zip")}-${var.name}-${var.environment}-${random_pet.this.id}", 0, 63), "-")
+  description   = "API lambda function"
+  handler       = "main"
+  runtime       = "go1.x"
+
+  create_package = false
+  s3_existing_package = {
+    bucket = module.lambda_build_s3_bucket.s3_bucket_id
+    key    = aws_s3_object.lambda_build[each.key].id
+  }
+
+  publish = true
+
+  attach_tracing_policy = true
+  tracing_mode          = "Active"
 
   tags = var.tags
 }
