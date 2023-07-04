@@ -106,8 +106,9 @@ module "lambda_function_api" {
 
   create_package = false
   s3_existing_package = {
-    bucket = module.lambda_build_s3_bucket.s3_bucket_id
-    key    = aws_s3_object.lambda_build[each.key].id
+    bucket     = module.lambda_build_s3_bucket.s3_bucket_id
+    key        = aws_s3_object.lambda_build[each.key].id
+    version_id = aws_s3_object.lambda_build[each.key].version_id
   }
 
   publish = true
