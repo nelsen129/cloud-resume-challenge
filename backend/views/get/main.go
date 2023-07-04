@@ -19,13 +19,14 @@ type Item struct {
 }
 
 func HandleRequest(ctx context.Context) (int, error) {
+	xray.Configure(xray.Config{LogLevel: "trace"})
 	sess := session.Must(session.NewSession())
 	dynamo := dynamodb.New(sess)
 	xray.AWS(dynamo.Client)
 
 	table_name := os.Getenv("TABLE_NAME")
 	log.Printf("Attempting to read view-count at stat from %s", table_name)
-	result, err := dynamo.GetItem(&dynamodb.GetItemInput{
+	result, err := dynamo.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		TableName: &table_name,
 		Key: map[string]*dynamodb.AttributeValue{
 			"stat": {
