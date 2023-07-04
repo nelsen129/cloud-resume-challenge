@@ -68,6 +68,27 @@ resource "aws_s3_object" "lambda_build" {
   tags = var.tags
 }
 
+data "aws_iam_policy_document" "dynamodb_read_write" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:DescribeTable",
+      "dynamodb:BatchGetItem",
+      "dynamodb:DescribeStream",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:PutItem"
+    ]
+    resources = [
+      module.dynamodb_table.dynamodb_table_arn
+    ]
+  }
+}
+
 module "lambda_function_api" {
   for_each = local.api_info
 
@@ -89,6 +110,9 @@ module "lambda_function_api" {
 
   attach_tracing_policy = true
   tracing_mode          = "Active"
+
+  attach_policy_json = true
+  policy_json        = data.aws_iam_policy_document.dynamodb_read_write.json
 
   tags = var.tags
 }
