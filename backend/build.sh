@@ -9,7 +9,7 @@ do
     cat $file_name >> out/api_info.txt
     cd $(dirname $file_name)
     go get .
-    GOOS=linux GOARCH=amd64 go build main.go
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build main.go
     zip $curr_dir/out/$(cat "api_info.txt" | awk '{print $3}') main
     rm main
     cd $curr_dir
