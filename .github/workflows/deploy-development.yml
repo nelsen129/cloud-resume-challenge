@@ -91,7 +91,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: backend/views/get
+        working-directory: backend
 
     steps:
       - name: Git clone the repository
@@ -102,20 +102,14 @@ jobs:
         with:
           go-version: "1.20"
 
-      - name: Install dependencies
-        run: go get .
-
-      - name: Go build
-        run: GOOS=linux GOARCH=amd64 go build main.go
-
-      - name: Zip build
-        run: zip views_get.zip main
+      - name: Run build script
+        run: ./build.sh
 
       - name: Archive backend code build
         uses: actions/upload-artifact@v3
         with:
           name: backend-build-dev-${{ github.head_ref }}
-          path: backend/views/get/views_get.zip
+          path: backend/out
 
   development-deploy-backend:
     name: "deploy-development-backend"
@@ -137,7 +131,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: backend-build-dev-${{ github.head_ref }}
-          path: backend/views/get/views_get.zip
+          path: backend/out
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
