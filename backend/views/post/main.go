@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/aws-xray-sdk-go/instrumentation/awsv2"
@@ -19,18 +17,18 @@ type Item struct {
 	Quantity int
 }
 
-func HandleRequest(ctx context.Context) (int, error) {
+func HandleRequest(ctx context.Context) error {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
-		return 0, err
+		return err
 	}
 	awsv2.AWSV2Instrumentor(&cfg.APIOptions)
 	dynamo := dynamodb.NewFromConfig(cfg)
 
 	table_name := os.Getenv("TABLE_NAME")
 	update_expression := "ADD Quantity :inc"
-	log.Printf("Attempting to read view-count at stat from %s", table_name)
+	log.Printf("Attempting to update view-count at stat from %s", table_name)
 	result, err := dynamo.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName: &table_name,
 		Key: map[string]types.AttributeValue{
@@ -44,24 +42,13 @@ func HandleRequest(ctx context.Context) (int, error) {
 
 	if err != nil {
 		log.Fatalf("Got error calling UpdateItem: %s", err)
-		return 0, err
+		return err
 	}
 
-	if result.Attributes == nil {
-		msg := "could not get output attributes"
-		log.Fatalf(msg)
-		return 0, errors.New(msg)
-	}
+	log.Printf("Successfully updated the view count!")
+	log.Printf("Output attributes: %T", result.Attributes)
 
-	item := Item{}
-
-	err = attributevalue.UnmarshalMap(result.Attributes, &item)
-	if err != nil {
-		log.Fatalf("Failed to unmarshal Record, %v", err)
-		return 0, err
-	}
-
-	return item.Quantity, nil
+	return nil
 }
 
 func init() {
