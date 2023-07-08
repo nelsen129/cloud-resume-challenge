@@ -18,8 +18,39 @@ type Item struct {
 	Quantity int
 }
 
+type DynamoDBUpdateItemAPI interface {
+	UpdateItem(ctx context.Context, params *dynamodb.UpdateItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.UpdateItemOutput, error)
+}
+
 var dynamo *dynamodb.Client
 var table_name string
+
+func UpdateViewCountInDynamoDBTable(ctx context.Context, api DynamoDBUpdateItemAPI, table, partitionKey, value, update_expression string) (int, error) {
+	key := map[string]types.AttributeValue{}
+	key[partitionKey] = &types.AttributeValueMemberS{Value: value}
+	result, err := api.UpdateItem(ctx, &dynamodb.UpdateItemInput{
+		TableName: &table,
+		Key:       key,
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":inc": &types.AttributeValueMemberN{Value: "1"},
+		},
+		UpdateExpression: &update_expression,
+		ReturnValues:     "UPDATED_NEW",
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	item := Item{}
+
+	err = attributevalue.UnmarshalMap(result.Attributes, &item)
+
+	if err != nil {
+		return 0, err
+	}
+	return item.Quantity, nil
+}
 
 func init() {
 	xray.Configure(xray.Config{
@@ -37,37 +68,21 @@ func init() {
 }
 
 func HandleRequest(ctx context.Context) (int, error) {
+	partition_key := "stat"
+	value := "view-count"
 	update_expression := "ADD Quantity :inc"
 	log.Printf("Attempting to update view-count at stat from %s", table_name)
-	result, err := dynamo.UpdateItem(ctx, &dynamodb.UpdateItemInput{
-		TableName: &table_name,
-		Key: map[string]types.AttributeValue{
-			"stat": &types.AttributeValueMemberS{Value: "view-count"},
-		},
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":inc": &types.AttributeValueMemberN{Value: "1"},
-		},
-		UpdateExpression: &update_expression,
-		ReturnValues:     "UPDATED_NEW",
-	})
+
+	quantity, err := UpdateViewCountInDynamoDBTable(ctx, dynamo, table_name, partition_key, value, update_expression)
 
 	if err != nil {
 		log.Fatalf("Got error calling UpdateItem: %s", err)
 		return 0, err
 	}
 
-	item := Item{}
+	log.Printf("Successfully updated the view count! New view count: %d", quantity)
 
-	err = attributevalue.UnmarshalMap(result.Attributes, &item)
-
-	if err != nil {
-		log.Fatalf("Failed to unmarshal Record, %v", err)
-		return 0, err
-	}
-
-	log.Printf("Successfully updated the view count! New view count: %d", item.Quantity)
-
-	return item.Quantity, nil
+	return quantity, nil
 }
 
 func main() {

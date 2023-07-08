@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 
@@ -17,6 +16,32 @@ import (
 
 type Item struct {
 	Quantity int
+}
+
+type DynamoDBGetItemAPI interface {
+	GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
+}
+
+func GetViewCountFromDynamoDBTable(ctx context.Context, api DynamoDBGetItemAPI, table, partitionKey, value string) (int, error) {
+	key := map[string]types.AttributeValue{}
+	key[partitionKey] = &types.AttributeValueMemberS{Value: value}
+	result, err := api.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: &table,
+		Key:       key,
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	item := Item{}
+
+	err = attributevalue.UnmarshalMap(result.Item, &item)
+
+	if err != nil {
+		return 0, err
+	}
+	return item.Quantity, nil
 }
 
 var dynamo *dynamodb.Client
@@ -38,34 +63,20 @@ func init() {
 }
 
 func HandleRequest(ctx context.Context) (int, error) {
+	partition_key := "stat"
+	value := "view-count"
 	log.Printf("Attempting to read view-count at stat from %s", table_name)
-	result, err := dynamo.GetItem(ctx, &dynamodb.GetItemInput{
-		TableName: &table_name,
-		Key: map[string]types.AttributeValue{
-			"stat": &types.AttributeValueMemberS{Value: "view-count"},
-		},
-	})
+
+	quantity, err := GetViewCountFromDynamoDBTable(ctx, dynamo, table_name, partition_key, value)
 
 	if err != nil {
-		log.Fatalf("Got error calling GetItem: %s", err)
+		log.Fatalf("Get error calling GetItem: %s", err)
 		return 0, err
 	}
 
-	if result.Item == nil {
-		msg := "could not find view-count"
-		log.Fatalf(msg)
-		return 0, errors.New(msg)
-	}
+	log.Printf("Successfully got the view count! View count: %d", quantity)
 
-	item := Item{}
-
-	err = attributevalue.UnmarshalMap(result.Item, &item)
-	if err != nil {
-		log.Fatalf("Failed to unmarshal Record, %v", err)
-		return 0, err
-	}
-
-	return item.Quantity, nil
+	return quantity, nil
 }
 
 func main() {
