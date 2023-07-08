@@ -158,11 +158,14 @@ module "apigatewayv2" {
   domain_name                 = local.domain_name
   domain_name_certificate_arn = module.acm.acm_certificate_arn
 
+  default_route_settings = {
+    default_metrics_enabled = true
+  }
+
   integrations = {
     for key in local.api_info : "${split(" ", key)[1]} ${split(" ", key)[0]}" => {
-      lambda_arn               = module.lambda_function_api[key].lambda_function_arn
-      payload_format_version   = "2.0"
-      detailed_metrics_enabled = true
+      lambda_arn             = module.lambda_function_api[key].lambda_function_arn
+      payload_format_version = "2.0"
     }
   }
 
