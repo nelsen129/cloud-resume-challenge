@@ -167,8 +167,6 @@ module "cloudfront" {
 
     trim(substr("apigatewayv2-${var.name}-${var.environment}", 0, 63), "-") = {
       domain_name = replace(data.aws_apigatewayv2_api.backend.api_endpoint, "/^https?://([^/]*).*/", "$1")
-      origin_id   = "apigw"
-      origin_path = "/stage"
 
       custom_origin_config = {
         http_port              = 80
