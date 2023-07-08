@@ -309,7 +309,7 @@ resource "aws_route53_record" "cloudfront" {
 }
 
 resource "aws_ssm_parameter" "s3_bucket_name" {
-  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/s3_bucket_name"
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/s3-bucket-name"
   type  = "String"
   value = module.s3_bucket.s3_bucket_id
 }
