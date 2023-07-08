@@ -81,10 +81,66 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false -var-file="../../environments/stage.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}"
 
+  staging-test-backend:
+    name: "test-staging-backend"
+    runs-on: ubuntu-latest
+    environment: staging
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          cache-dependency-path: backend/**/go.sum
+
+      - name: Run test script
+        run: ./test.sh
+
+  staging-build-backend:
+    name: "build-staging-backend"
+    runs-on: ubuntu-latest
+    environment: staging
+    needs:
+      - staging-test-backend
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          cache-dependency-path: backend/**/go.sum
+
+      - name: Run build script
+        run: ./build.sh
+
+      - name: Archive backend code build
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build-stage
+          path: backend/out
+
   staging-deploy-backend:
     name: "deploy-staging-backend"
     runs-on: ubuntu-latest
     environment: staging
+    needs:
+      - staging-build-backend
 
     defaults:
       run:
@@ -94,6 +150,12 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
+
+      - name: Download backend build
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build-stage
+          path: backend/out
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
