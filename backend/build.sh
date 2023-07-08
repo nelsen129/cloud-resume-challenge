@@ -10,7 +10,8 @@ do
     cd $(dirname $file_name)
     go get .
     GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build main.go
-    zip $curr_dir/out/$(cat "api_info.txt" | awk '{print $3}') main
+    find . -name "main" -exec touch -d '1980-01-01 00:00:00' {} \;
+    zip -X -D $curr_dir/out/$(cat "api_info.txt" | awk '{print $3}') main
     rm main
     cd $curr_dir
 done
