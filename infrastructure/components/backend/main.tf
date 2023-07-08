@@ -64,7 +64,7 @@ resource "aws_s3_object" "lambda_build" {
   key    = split(" ", each.key)[2]
   source = "${path.module}/../../../backend/out/${split(" ", each.key)[2]}"
 
-  source_hash = filemd5("${path.module}/../../../backend/out/${split(" ", each.key)[2]}")
+  source_hash = filebase64sha256("${path.module}/../../../backend/out/${split(" ", each.key)[2]}")
 
   tags = var.tags
 }
