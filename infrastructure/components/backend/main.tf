@@ -112,6 +112,13 @@ module "lambda_function_api" {
     version_id = aws_s3_object.lambda_build[each.key].version_id
   }
 
+  allowed_triggers = {
+    AllowExecutionFromAPIGateway = {
+      service    = "apigateway"
+      source_arn = "${module.apigatewayv2.apigatewayv2_api_execution_arn}/*${split(" ", each.key)[0]}"
+    }
+  }
+
   publish = true
 
   attach_tracing_policy = true
