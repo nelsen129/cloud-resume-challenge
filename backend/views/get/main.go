@@ -19,16 +19,25 @@ type Item struct {
 	Quantity int
 }
 
-func HandleRequest(ctx context.Context) (int, error) {
-	cfg, err := config.LoadDefaultConfig(ctx)
+var dynamo *dynamodb.Client
+var table_name string
+
+func init() {
+	xray.Configure(xray.Config{
+		DaemonAddr:     "127.0.0.1:2000", // default
+		ServiceVersion: "1.2.3",
+	})
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
-		return 0, err
+		return
 	}
 	awsv2.AWSV2Instrumentor(&cfg.APIOptions)
-	dynamo := dynamodb.NewFromConfig(cfg)
+	dynamo = dynamodb.NewFromConfig(cfg)
+	table_name = os.Getenv("TABLE_NAME")
+}
 
-	table_name := os.Getenv("TABLE_NAME")
+func HandleRequest(ctx context.Context) (int, error) {
 	log.Printf("Attempting to read view-count at stat from %s", table_name)
 	result, err := dynamo.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: &table_name,
@@ -57,13 +66,6 @@ func HandleRequest(ctx context.Context) (int, error) {
 	}
 
 	return item.Quantity, nil
-}
-
-func init() {
-	xray.Configure(xray.Config{
-		DaemonAddr:     "127.0.0.1:2000", // default
-		ServiceVersion: "1.2.3",
-	})
 }
 
 func main() {
