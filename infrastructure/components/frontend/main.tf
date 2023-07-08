@@ -43,12 +43,6 @@ data "aws_iam_policy_document" "kms_key" {
     ]
 
     resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/environment"
-      values   = [var.environment]
-    }
   }
 }
 
