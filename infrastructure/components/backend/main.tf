@@ -121,3 +121,20 @@ module "lambda_function_api" {
 
   tags = var.tags
 }
+
+# tfsec:ignore:aws-api-gateway-enable-access-logging
+module "apigateway-v2" {
+  source  = "terraform-aws-modules/apigateway-v2/aws"
+  version = "~> 2.2"
+
+  name          = trim(substr("apigateway-${var.name}-${var.environment}-${random_pet.this.id}", 0, 63), "-")
+  protocol_type = "HTTP"
+
+  integrations = {
+    for key in local.api_info : "${split(" ", key)[1]} ${split(" ", key)[0]}" => {
+      lambda_arn = module.lambda_function_api[key].lambda_function_arn
+    }
+  }
+
+  tags = var.tags
+}
