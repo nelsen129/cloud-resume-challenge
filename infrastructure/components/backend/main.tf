@@ -3,7 +3,7 @@ resource "random_pet" "this" {
 }
 
 locals {
-  api_info    = toset(compact(split("\n", file("../../../backend/out/api_info.txt"))))
+  api_info    = try(toset(compact(split("\n", file("../../../backend/out/api_info.txt")))), toset([]))
   domain_name = "api.${var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname}"
 }
 
