@@ -14,6 +14,14 @@ data "aws_s3_bucket" "frontend" {
   bucket = data.aws_ssm_parameter.frontend_s3_bucket_name.value
 }
 
+data "aws_ssm_parameter" "backend_apigatewayv2_api_id" {
+  name = "/${var.name}/${var.environment}/backend/apigatewayv2-api-id"
+}
+
+data "aws_apigatewayv2_api" "backend" {
+  api_id = data.aws_ssm_parameter.backend_apigatewayv2_api_id.value
+}
+
 resource "random_pet" "this" {
   length = 2
 }
@@ -156,6 +164,19 @@ module "cloudfront" {
       domain_name           = data.aws_s3_bucket.frontend.bucket_regional_domain_name
       origin_access_control = trim(substr("s3-oac-${var.name}-${var.environment}", 0, 63), "-")
     }
+
+    trim(substr("apigatewayv2-${var.name}-${var.environment}", 0, 63), "-") = {
+      domain_name = replace(data.aws_apigatewayv2_api.backend.api_endpoint, "/^https?://([^/]*).*/", "$1")
+      origin_id   = "apigw"
+      origin_path = "/stage"
+
+      custom_origin_config = {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "https-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
+    }
   }
 
   default_cache_behavior = {
@@ -168,6 +189,17 @@ module "cloudfront" {
   }
 
   default_root_object = "index.html"
+
+  ordered_cache_behavior = [
+    {
+      path_pattern           = "/api/*"
+      target_origin_id       = trim(substr("apigatewayv2-${var.name}-${var.environment}", 0, 63), "-")
+      viewer_protocol_policy = "redirect-to-https"
+
+      allowed_methods = ["GET", "POST", "HEAD", "OPTIONS"]
+      cached_methods  = []
+    }
+  ]
 
   viewer_certificate = {
     acm_certificate_arn      = module.acm.acm_certificate_arn
