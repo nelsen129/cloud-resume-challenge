@@ -4,6 +4,8 @@ data "aws_cloudfront_log_delivery_canonical_user_id" "cloudfront" {}
 
 data "aws_canonical_user_id" "current" {}
 
+data "aws_default_tags" "this" {}
+
 resource "random_pet" "this" {
   length = 2
 }
@@ -304,4 +306,10 @@ resource "aws_route53_record" "cloudfront" {
     zone_id                = module.cloudfront.cloudfront_distribution_hosted_zone_id
     evaluate_target_health = true
   }
+}
+
+resource "aws_ssm_parameter" "s3_bucket_name" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/s3_bucket_name"
+  type  = "String"
+  value = module.s3_bucket.s3_bucket_id
 }
