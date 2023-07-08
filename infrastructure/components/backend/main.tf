@@ -3,7 +3,8 @@ resource "random_pet" "this" {
 }
 
 locals {
-  api_info = toset(compact(split("\n", file("../../../backend/out/api_info.txt"))))
+  api_info    = toset(compact(split("\n", file("../../../backend/out/api_info.txt"))))
+  domain_name = "api.${var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname}"
 }
 
 module "dynamodb_table" {
@@ -122,15 +123,40 @@ module "lambda_function_api" {
   tags = var.tags
 }
 
+data "aws_route53_zone" "this" {
+  name = "${var.hostname}."
+}
+
+module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> 4.0"
+
+  domain_name = local.domain_name
+  zone_id     = data.aws_route53_zone.this.id
+}
+
+resource "aws_route53_record" "api" {
+  zone_id = data.aws_route53_zone.this.id
+  name    = local.domain_name
+  type    = "A"
+
+  alias {
+    name                   = module.apigatewayv2.apigatewayv2_domain_name_configuration[0].target_domain_name
+    zone_id                = module.apigatewayv2.apigatewayv2_domain_name_configuration[0].hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
 # tfsec:ignore:aws-api-gateway-enable-access-logging
-module "apigateway-v2" {
+module "apigatewayv2" {
   source  = "terraform-aws-modules/apigateway-v2/aws"
   version = "~> 2.2"
 
-  create_api_domain_name = false
-
   name          = trim(substr("apigateway-${var.name}-${var.environment}-${random_pet.this.id}", 0, 63), "-")
   protocol_type = "HTTP"
+
+  domain_name                 = local.domain_name
+  domain_name_certificate_arn = module.acm.acm_certificate_arn
 
   integrations = {
     for key in local.api_info : "${split(" ", key)[1]} ${split(" ", key)[0]}" => {
