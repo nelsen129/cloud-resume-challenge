@@ -1,3 +1,5 @@
+data "aws_default_tags" "this" {}
+
 resource "random_pet" "this" {
   length = 2
 }
@@ -179,4 +181,28 @@ module "apigatewayv2" {
   }
 
   tags = var.tags
+}
+
+resource "aws_ssm_parameter" "dynamodb_table_id" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/dynamodb-table-id"
+  type  = "String"
+  value = module.dynamodb_table.dynamodb_table_id
+}
+
+resource "aws_ssm_parameter" "lambda_build_s3_bucket_id" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/lambda-build-s3-bucket-id"
+  type  = "String"
+  value = module.lambda_build_s3_bucket.s3_bucket_id
+}
+
+resource "aws_ssm_parameter" "lambda_api_function_arns" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/lambda-api-functions-arns"
+  type  = "String"
+  value = jsonencode({ for k, v in module.lambda_function_api : k => v.lambda_function_arn })
+}
+
+resource "aws_ssm_parameter" "apigatewayv2_api_id" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/apigatewayv2-api-id"
+  type  = "String"
+  value = module.apigatewayv2.apigatewayv2_api_id
 }
