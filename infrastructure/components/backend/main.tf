@@ -160,6 +160,8 @@ module "apigatewayv2" {
 
   default_route_settings = {
     default_metrics_enabled = true
+    throttling_burst_limit  = 100
+    throttling_rate_limit   = 100
   }
 
   integrations = {
