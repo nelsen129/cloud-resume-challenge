@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/aws-xray-sdk-go/instrumentation/awsv2"
@@ -17,11 +18,11 @@ type Item struct {
 	Quantity int
 }
 
-func HandleRequest(ctx context.Context) error {
+func HandleRequest(ctx context.Context) (int, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
-		return err
+		return 0, err
 	}
 	awsv2.AWSV2Instrumentor(&cfg.APIOptions)
 	dynamo := dynamodb.NewFromConfig(cfg)
@@ -38,17 +39,26 @@ func HandleRequest(ctx context.Context) error {
 			":inc": &types.AttributeValueMemberN{Value: "1"},
 		},
 		UpdateExpression: &update_expression,
+		ReturnValues:     "UPDATED_NEW",
 	})
 
 	if err != nil {
 		log.Fatalf("Got error calling UpdateItem: %s", err)
-		return err
+		return 0, err
 	}
 
-	log.Printf("Successfully updated the view count!")
-	log.Printf("Output attributes: %T", result.Attributes)
+	item := Item{}
 
-	return nil
+	err = attributevalue.UnmarshalMap(result.Attributes, &item)
+
+	if err != nil {
+		log.Fatalf("Failed to unmarshal Record, %v", err)
+		return 0, err
+	}
+
+	log.Printf("Successfully updated the view count! New view count: %d", item.Quantity)
+
+	return item.Quantity, nil
 }
 
 func init() {
