@@ -10,12 +10,12 @@ output "lambda_build_s3_bucket_id" {
 
 output "lambda_api_cloudwatch_log_group_names" {
   description = "The names of the Cloudwatch Log Groups for the Lambda functions"
-  value       = module.lambda_function_api[*].lambda_cloudwatch_log_group_name
+  value       = { for k, v in module.lambda_function_api : k => v.lambda_cloudwatch_log_group_name }
 }
 
 output "lambda_api_function_arns" {
   description = "The ARNs of the Lambda Functions"
-  value       = module.lambda_function_api[*].lambda_function_arn
+  value       = { for k, v in module.lambda_function_api : k => v.lambda_function_arn }
 }
 
 output "apigatewayv2_api_endpoint" {
