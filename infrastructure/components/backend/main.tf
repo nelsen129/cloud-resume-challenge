@@ -127,6 +127,8 @@ module "apigateway-v2" {
   source  = "terraform-aws-modules/apigateway-v2/aws"
   version = "~> 2.2"
 
+  create_api_domain_name = false
+
   name          = trim(substr("apigateway-${var.name}-${var.environment}-${random_pet.this.id}", 0, 63), "-")
   protocol_type = "HTTP"
 
