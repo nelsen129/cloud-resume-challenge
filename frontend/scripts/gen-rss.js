@@ -23,7 +23,7 @@ async function generate() {
 
       feed.item({
         title: frontmatter.data.title,
-        url: "/posts/" + name.replace(/\.mdx?/, ""),
+        url: "https://patricknelsen.com/posts/" + name.replace(/\.mdx?/, ""),
         date: frontmatter.data.date,
         description: frontmatter.data.description,
         categories: frontmatter.data.tag.split(", "),
