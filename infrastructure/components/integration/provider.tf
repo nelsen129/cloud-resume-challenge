@@ -3,7 +3,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      component   = "frontend"
+      component   = "integration"
       environment = var.environment
       project     = var.name
     }
@@ -14,14 +14,13 @@ provider "aws" {
   }
 }
 
-# Needed to delete current resources. Should be deleted next release after v0.1.0
 provider "aws" {
   alias  = "us-east-1"
   region = "us-east-1"
 
   default_tags {
     tags = {
-      component   = "frontend"
+      component   = "integration"
       environment = var.environment
       project     = var.name
     }

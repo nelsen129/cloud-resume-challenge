@@ -3,7 +3,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      component   = "frontend"
+      component   = "backend"
       environment = var.environment
       project     = var.name
     }

@@ -1,10 +1,11 @@
+data "aws_default_tags" "this" {}
+
 resource "random_pet" "this" {
   length = 2
 }
 
 locals {
-  api_info    = try(toset(compact(split("\n", file("../../../backend/out/api_info.txt")))), toset([]))
-  domain_name = "api.${var.add_environment_to_hostname ? "${trim(substr(var.environment, 0, 16), "-")}.${var.hostname}" : var.hostname}"
+  api_info = try(toset(compact(split("\n", file("../../../backend/out/api_info.txt")))), toset([]))
 }
 
 module "dynamodb_table" {
@@ -130,30 +131,6 @@ module "lambda_function_api" {
   tags = var.tags
 }
 
-data "aws_route53_zone" "this" {
-  name = "${var.hostname}."
-}
-
-module "acm" {
-  source  = "terraform-aws-modules/acm/aws"
-  version = "~> 4.0"
-
-  domain_name = local.domain_name
-  zone_id     = data.aws_route53_zone.this.id
-}
-
-resource "aws_route53_record" "api" {
-  zone_id = data.aws_route53_zone.this.id
-  name    = local.domain_name
-  type    = "A"
-
-  alias {
-    name                   = module.apigatewayv2.apigatewayv2_domain_name_configuration[0].target_domain_name
-    zone_id                = module.apigatewayv2.apigatewayv2_domain_name_configuration[0].hosted_zone_id
-    evaluate_target_health = true
-  }
-}
-
 # tfsec:ignore:aws-api-gateway-enable-access-logging
 module "apigatewayv2" {
   source  = "terraform-aws-modules/apigateway-v2/aws"
@@ -162,8 +139,7 @@ module "apigatewayv2" {
   name          = trim(substr("apigateway-${var.name}-${var.environment}-${random_pet.this.id}", 0, 63), "-")
   protocol_type = "HTTP"
 
-  domain_name                 = local.domain_name
-  domain_name_certificate_arn = module.acm.acm_certificate_arn
+  create_api_domain_name = false
 
   default_route_settings = {
     default_metrics_enabled = true
@@ -172,11 +148,43 @@ module "apigatewayv2" {
   }
 
   integrations = {
-    for key in local.api_info : "${split(" ", key)[1]} ${split(" ", key)[0]}" => {
+    for key in local.api_info : "${split(" ", key)[1]} /api${split(" ", key)[0]}" => {
       lambda_arn             = module.lambda_function_api[key].lambda_function_arn
       payload_format_version = "2.0"
     }
   }
+
+  tags = var.tags
+}
+
+resource "aws_ssm_parameter" "dynamodb_table_id" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/dynamodb-table-id"
+  type  = "String"
+  value = module.dynamodb_table.dynamodb_table_id
+
+  tags = var.tags
+}
+
+resource "aws_ssm_parameter" "lambda_build_s3_bucket_id" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/lambda-build-s3-bucket-id"
+  type  = "String"
+  value = module.lambda_build_s3_bucket.s3_bucket_id
+
+  tags = var.tags
+}
+
+resource "aws_ssm_parameter" "lambda_api_function_arns" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/lambda-api-functions-arns"
+  type  = "String"
+  value = jsonencode({ for k, v in module.lambda_function_api : k => v.lambda_function_arn })
+
+  tags = var.tags
+}
+
+resource "aws_ssm_parameter" "apigatewayv2_api_id" {
+  name  = "/${var.name}/${var.environment}/${data.aws_default_tags.this.tags["component"]}/apigatewayv2-api-id"
+  type  = "String"
+  value = module.apigatewayv2.apigatewayv2_api_id
 
   tags = var.tags
 }
