@@ -1,8 +1,10 @@
 ---
 title: Creating a Production-Ready Terraform Infrastructure
-date: 2023/7/3
-description: Terraform can be unruly.
-tag: terraform
+date: 2023/7/9
+description:
+  Terraform can make production-ready architecture much easier to implement.
+  But it can be difficult to streamline the development process.
+tag: terraform, devops
 author: Patrick Nelsen
 ---
 
@@ -103,5 +105,50 @@ projects, workflows, and companies:
 In this, we split what was previously only modules into two types of Terraform projects: modules
 and components. A component represents a project-specific, broadly-scoped set of resources that
 share the same lifecycle. Some examples of components are network, compute, database, etc. A
-module represents a generic, narrowly scopes set of resources that accomplish a specific task.
-Some examples of modules might be vpc, ec2_bastion_host, s3_bucket_with_sns_topic, etc.
+module represents a generic, narrowly scoped set of resources that accomplish a specific task.
+Some examples of modules might be vpc, ec2_bastion_host, s3_bucket_with_sns_topic, etc. Ideally,
+modules should be general enough that they could be split off into their own repository for
+organization-wide usage.
+
+The previous environments directories are now simple environment variable files. This allows
+incredibly flexible environment definition and creation without having to copy chunks of code
+between multiple environnments.
+
+In the backend, each combination of environment and component has its own state file. These
+state files might be named something like `<environment>-<component>/terraform.tfstate`.
+The life cycles of every component is isolated, allowing for isolated changes and deployments.
+
+This structure requires more work in the CI/CD pipeline to configure. The CI/CD pipeline needs
+to deploy each component in order to the correct environment. Once this is set up, it can be
+incredibly easy to add more components.
+
+It also requires some extra configuration to manually initialize and deploy Terraform infrastructure.
+For a development environment, the developer will have to modify both their `init` and `apply`
+commands. This is an example for a `dev` environment deploying to a `compute` component:
+
+```
+terraform init -backend-config="key=dev-compute/terraform.tfvars
+terraform apply -var-file="../../environments/dev.tfvars"
+```
+
+Finally, it also requires some planning to pass required data between two components. For
+example, an EC2-based compute component might require VPC and subnet IDs from the network
+component. Depending on your organization, you may already have a way to store and use secrets,
+such as Hashicorp Vault, and that would be an excellent way to communicate this data. For
+this project, I've chosen to use AWS SSM Parameter Store. This is a hierarchical parameter
+store that can handle simple parameters and also secrets. What I've done is store relevant
+parameters, such as VPC ID, in an SSM parameter named like
+`/cloud-resume-challenge/dev/network/vpc-id`. Downstream components can use these parameters
+for their configuration. These parameters will automatically update on subsequent runs,
+creating easy and automatic updates across components.
+
+## Conclusion
+
+Creating a scalable infrastructure deployment can be difficult for any architecture, but
+having a good plan can make it significantly easier to deploy updates to many environments.
+Different solutions may work better for different organizations, but this structure has
+proven incredibly useful in my experience.
+
+While it may take some extra effort to set up and configure this structure, its benefits
+greatly outweigh its weaknesses. This creates a repeatably deployable infrastructure that
+can work for more complex architectures.

@@ -4,7 +4,17 @@
         <description><![CDATA[Patrick Nelsen]]></description>
         <link>https://patricknelsen.com</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 30 Jun 2023 04:28:27 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 09 Jul 2023 16:13:15 GMT</lastBuildDate>
         <atom:link href="https://patricknelsen.com/feed.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title><![CDATA[Creating a Production-Ready Terraform Infrastructure]]></title>
+            <description><![CDATA[Terraform can make production-ready architecture much easier to implement. But it can be difficult to streamline the development process.]]></description>
+            <link>/posts/terraform_infrastructure</link>
+            <guid isPermaLink="true">/posts/terraform_infrastructure</guid>
+            <category><![CDATA[terraform]]></category>
+            <category><![CDATA[devops]]></category>
+            <dc:creator><![CDATA[Patrick Nelsen]]></dc:creator>
+            <pubDate>Sun, 09 Jul 2023 07:00:00 GMT</pubDate>
+        </item>
     </channel>
 </rss>
