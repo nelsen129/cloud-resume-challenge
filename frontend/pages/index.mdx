@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 export const Views = () => {
   const [data, setData] = useState(null);
   useEffect(() => {
-    fetch("https://dev-50-integrate.dev.patricknelsen.com/api/views", {
+    fetch("api/views", {
       method: "POST",
       mode: "same-origin",
       cache: "no-cache",
