@@ -10,10 +10,44 @@ permissions:
   contents: read
 
 jobs:
+  development-destroy-integration:
+    name: "destroy-development-integration"
+    runs-on: ubuntu-latest
+    environment: development
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: infrastructure/components/integration
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: "${{ secrets.AWS_MANAGEMENT_ROLE }}"
+          aws-region: us-east-1
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=dev-${{ github.head_ref }}-integration/terraform.tfstate"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
+
   development-destroy-frontend:
     name: "destroy-development-frontend"
     runs-on: ubuntu-latest
     environment: development
+    needs:
+      - development-destroy-integration
 
     defaults:
       run:
@@ -40,4 +74,38 @@ jobs:
         run: terraform validate
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}"
+        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
+
+  development-destroy-backend:
+    name: "destroy-development-backend"
+    runs-on: ubuntu-latest
+    environment: development
+    needs:
+      - development-destroy-integration
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: infrastructure/components/backend
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: "${{ secrets.AWS_MANAGEMENT_ROLE }}"
+          aws-region: us-east-1
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=dev-${{ github.head_ref }}-backend/terraform.tfstate"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
