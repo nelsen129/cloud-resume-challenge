@@ -63,3 +63,45 @@ There's also a `modules/` directory, which contains several modules, such as `ne
 `database`, etc. Each of these modules has a `main.tf`, which is a more complex Terraform file
 containing all of the various resources that must be created for that module, as well as the
 usual `variables.tf` and `outputs.tf`.
+
+This structure works well for a basic workflow, but it can be limiting for any project of a
+reasonable scale. Each new environment requires a new environment folder, and any new module
+requires changes to every environment's `main.tf` file. This results in a lot of code duplication,
+and it's nearly impossible to create ephemeral development/test environments.
+
+Furthermore, this instrinsically links the lifecycle of an entire environment. Long-lived network
+and database code gets deployed alongside short-lived compute code. Because of how Terraform
+handles state, this means that the only way to issue an infrastructure update is to update the
+entire environment, and so only one developer can meaningfully work on the development environment
+at a time. Most importantly, if one part of the state file is corrupted, this may require Terraform
+state surgery across all resources. If a bad deployment leaves the compute resources in a bad state,
+this may also affect network resources, which can lead to unstable deployments and a general bad
+time for anyone responsible for Terraform
+
+## A scalable solution
+
+These scalability issues have led to me creating this solution that can work for a wide array of
+projects, workflows, and companies:
+
+```
+.
+├── components
+│   └── network
+│       ├── main.tf
+│       ├── outputs.tf
+│       └── variables.tf
+├── environments
+│   ├── prod.tfvars
+│   └── stage.tfvars
+└── modules
+    └── vpc
+        ├── main.tf
+        ├── outputs.tf
+        └── variables.tf
+```
+
+In this, we split what was previously only modules into two types of Terraform projects: modules
+and components. A component represents a project-specific, broadly-scoped set of resources that
+share the same lifecycle. Some examples of components are network, compute, database, etc. A
+module represents a generic, narrowly scopes set of resources that accomplish a specific task.
+Some examples of modules might be vpc, ec2_bastion_host, s3_bucket_with_sns_topic, etc.
