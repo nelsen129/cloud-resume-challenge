@@ -220,7 +220,7 @@ module "cloudfront" {
   custom_error_response = [{
     error_code         = 404
     response_code      = 404
-    response_page_path = "/errors/404.html"
+    response_page_path = "/404"
   }]
 
   tags = var.tags
@@ -229,8 +229,14 @@ module "cloudfront" {
 data "aws_iam_policy_document" "s3_policy" {
   # Origin Access Controls
   statement {
-    actions   = ["s3:GetObject"]
-    resources = ["${data.aws_s3_bucket.frontend.arn}/*"]
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      data.aws_s3_bucket.frontend.arn,
+      "${data.aws_s3_bucket.frontend.arn}/*"
+    ]
 
     principals {
       type        = "Service"
