@@ -229,8 +229,14 @@ module "cloudfront" {
 data "aws_iam_policy_document" "s3_policy" {
   # Origin Access Controls
   statement {
-    actions   = ["s3:GetObject"]
-    resources = ["${data.aws_s3_bucket.frontend.arn}/*"]
+    actions = [
+      "s3:GetObject",
+      "s3:ListObject"
+    ]
+    resources = [
+      data.aws_s3_bucket.frontend.arn,
+      "${data.aws_s3_bucket.frontend.arn}/*"
+    ]
 
     principals {
       type        = "Service"
