@@ -40,7 +40,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}"
+        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
 
   development-destroy-frontend:
     name: "destroy-development-frontend"
@@ -74,7 +74,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}"
+        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
 
   development-destroy-backend:
     name: "destroy-development-backend"
@@ -108,4 +108,4 @@ jobs:
         run: terraform validate
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}"
+        run: terraform destroy -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
