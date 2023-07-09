@@ -1,8 +1,1 @@
-{
-  "overrides": [
-    {
-      "files": "*.mdx",
-      "options": { "parser": "markdown" }
-    }
-  ]
-}
+{}

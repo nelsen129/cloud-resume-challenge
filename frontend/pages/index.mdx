@@ -4,12 +4,37 @@ title: About
 date: 2023-06-28
 ---
 
+import { useState, useEffect } from "react";
+
+export const Views = () => {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    fetch("https://dev-50-integrate.dev.patricknelsen.com/api/views", {
+      method: "POST",
+      mode: "same-origin",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((json) => setData(json))
+      .catch((error) => console.error(error));
+  }, []);
+  if (!data) {
+    return "Fetching views...";
+  }
+  return data;
+};
+
 ## About
 
 Hello! My name is Patrick, and I am a DevOps engineer deeply interested
 in automating secure, reliable, scalable, and cost-effective infrastructure.
 I am skilled in managing Terraform, CI/CD, AWS, Kubernetes, and more.
 Please feel free to check out my resume and posts!
+
+About page hit count: <Views />
 
 ---
 
