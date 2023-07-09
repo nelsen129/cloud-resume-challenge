@@ -190,12 +190,24 @@ module "cloudfront" {
 
   ordered_cache_behavior = [
     {
-      path_pattern           = "/api/*"
-      target_origin_id       = trim(substr("apigatewayv2-${var.name}-${var.environment}", 0, 63), "-")
-      viewer_protocol_policy = "redirect-to-https"
+      path_pattern     = "/api/*"
+      target_origin_id = trim(substr("apigatewayv2-${var.name}-${var.environment}", 0, 63), "-")
 
-      allowed_methods = ["GET", "POST", "HEAD", "OPTIONS"]
-      cached_methods  = []
+      allowed_methods = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+      cached_methods  = ["GET", "HEAD"]
+
+      default_ttl = 0
+      min_ttl     = 0
+      max_ttl     = 0
+
+      forwarded_values = {
+        query_string = true
+        cookies = {
+          forward = "all"
+        }
+      }
+
+      viewer_protocol_policy = "redirect-to-https"
     }
   ]
 

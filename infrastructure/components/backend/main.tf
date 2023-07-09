@@ -148,7 +148,7 @@ module "apigatewayv2" {
   }
 
   integrations = {
-    for key in local.api_info : "${split(" ", key)[1]} ${split(" ", key)[0]}" => {
+    for key in local.api_info : "${split(" ", key)[1]} /api${split(" ", key)[0]}" => {
       lambda_arn             = module.lambda_function_api[key].lambda_function_arn
       payload_format_version = "2.0"
     }
