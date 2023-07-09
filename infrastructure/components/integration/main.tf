@@ -231,7 +231,7 @@ data "aws_iam_policy_document" "s3_policy" {
   statement {
     actions = [
       "s3:GetObject",
-      "s3:ListObject"
+      "s3:ListBucket"
     ]
     resources = [
       data.aws_s3_bucket.frontend.arn,
