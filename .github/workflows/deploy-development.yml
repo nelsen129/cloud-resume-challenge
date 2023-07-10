@@ -236,6 +236,6 @@ jobs:
         with:
           build: npm run build
           start: npm start
-          project: ./frontend
+          working-directory: frontend
         env:
-          CYPRESS_BASE_URL: "https://${{ steps.development-deploy-integration.outputs.HOSTNAME }}"
+          CYPRESS_BASE_URL: "https://${ steps.development-deploy-integration.outputs.HOSTNAME }"
