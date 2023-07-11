@@ -241,7 +241,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: hostname-dev-${{ github.head_ref }}
-          path: frontend/hostname.env
+          path: frontend
 
       - name: Set hostname environment variable
         id: hostname-env
