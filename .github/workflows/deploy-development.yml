@@ -245,7 +245,7 @@ jobs:
 
       - name: Set hostname environment variable
         id: hostname-env
-        run: echo "hostname=${cat hostname.env}" >> "$GITHUB_ENV"
+        run: echo "hostname=$(cat hostname.env)" >> "$GITHUB_ENV"
 
       - name: Cypress run
         uses: cypress-io/github-action@v5
