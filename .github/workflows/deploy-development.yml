@@ -248,4 +248,4 @@ jobs:
         with:
           working-directory: frontend
         env:
-          CYPRESS_BASE_URL: "https://$(cat hostname.env)"
+          CYPRESS_BASE_URL: "https://${cat hostname.env}"
