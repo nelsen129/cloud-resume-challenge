@@ -213,7 +213,13 @@ jobs:
         run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
 
       - name: Set DNS hostname output
-        run: echo "HOSTNAME=$(terraform output | grep route53_record_name | cut -d'"' -f 2)" >> "$GITHUB_OUTPUT"
+        run: echo "HOSTNAME=$(terraform output | grep route53_record_name | cut -d'"' -f 2)" >> hostname.env
+
+      - name: Archive DNS hostname
+        uses: actions/upload-artifact@v3
+        with:
+          name: hostname-dev-${{ github.head_ref }}
+          path: infrastructure/components/integration/hostname.env
 
   development-cypress-run:
     name: "test-development-cypress"
@@ -231,9 +237,15 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Download backend build
+        uses: actions/download-artifact@v3
+        with:
+          name: hostname-dev-${{ github.head_ref }}
+          path: frontend/hostname.env
+
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
           working-directory: frontend
         env:
-          CYPRESS_BASE_URL: "https://${{ steps.development-deploy-integration.outputs.HOSTNAME }}"
+          CYPRESS_BASE_URL: "https://$(cat hostname.env)"
