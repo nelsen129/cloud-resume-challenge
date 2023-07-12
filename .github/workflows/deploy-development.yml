@@ -243,13 +243,8 @@ jobs:
           name: hostname-dev-${{ github.head_ref }}
           path: frontend
 
-      - name: Set hostname environment variable
-        id: hostname-env
-        run: echo "hostname=$(cat hostname.env)" >> "$GITHUB_ENV"
-
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
           working-directory: frontend
-        env:
-          CYPRESS_BASE_URL: "https://${{ steps.hostname-env.outputs.hostname }}"
+          start: "CYPRESS_BASE_URL=$(cat hostname.env) npx cypress run"
