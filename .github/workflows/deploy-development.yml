@@ -251,4 +251,4 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           working-directory: frontend
-          start: "npx cypress run --config baseUrl=${{ env.HOSTNAME }}"
+          start: "npx cypress run --config baseUrl=https://${{ env.HOSTNAME }}"
