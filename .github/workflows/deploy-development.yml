@@ -26,6 +26,12 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Sets MODIFIED_BRANCH_NAME
+        env:
+          name: "${{github.head_ref}}"
+        run: |
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -40,7 +46,7 @@ jobs:
       - name: Archive frontend code build
         uses: actions/upload-artifact@v3
         with:
-          name: frontend-build-dev-${{ github.head_ref }}
+          name: "frontend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: frontend/out
 
   development-deploy-frontend:
@@ -59,10 +65,16 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Sets MODIFIED_BRANCH_NAME
+        env:
+          name: "${{github.head_ref}}"
+        run: |
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+
       - name: Download frontend build
         uses: actions/download-artifact@v3
         with:
-          name: frontend-build-dev-${{ github.head_ref }}
+          name: "frontend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: frontend/out
 
       - name: Configure aws credentials
@@ -75,13 +87,13 @@ jobs:
         run: terraform fmt -check
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=dev-${{ github.head_ref }}-frontend/terraform.tfstate"
+        run: terraform init -backend-config="key=dev-${MODIFIED_BRANCH_NAME}-frontend/terraform.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
+        run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${MODIFIED_BRANCH_NAME}"
 
   development-test-backend:
     name: "test-development-backend"
@@ -122,6 +134,12 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Sets MODIFIED_BRANCH_NAME
+        env:
+          name: "${{github.head_ref}}"
+        run: |
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -134,7 +152,7 @@ jobs:
       - name: Archive backend code build
         uses: actions/upload-artifact@v3
         with:
-          name: backend-build-dev-${{ github.head_ref }}
+          name: "backend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: backend/out
 
   development-deploy-backend:
@@ -153,10 +171,16 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Sets MODIFIED_BRANCH_NAME
+        env:
+          name: "${{github.head_ref}}"
+        run: |
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+
       - name: Download backend build
         uses: actions/download-artifact@v3
         with:
-          name: backend-build-dev-${{ github.head_ref }}
+          name: "backend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: backend/out
 
       - name: Configure aws credentials
@@ -169,13 +193,13 @@ jobs:
         run: terraform fmt -check
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=dev-${{ github.head_ref }}-backend/terraform.tfstate"
+        run: terraform init -backend-config="key=dev-${MODIFIED_BRANCH_NAME}-backend/terraform.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
+        run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${MODIFIED_BRANCH_NAME}"
 
   development-deploy-integration:
     name: "deploy-development-integration"
@@ -194,6 +218,12 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Sets MODIFIED_BRANCH_NAME
+        env:
+          name: "${{github.head_ref}}"
+        run: |
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -204,10 +234,10 @@ jobs:
         run: terraform fmt -check
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=dev-${{ github.head_ref }}-integration/terraform.tfstate"
+        run: terraform init -backend-config="key=dev-${MODIFIED_BRANCH_NAME}-integration/terraform.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${{ github.head_ref }}"
+        run: terraform apply -auto-approve -input=false -var-file="../../environments/dev.tfvars" -var="role_arn=${{ secrets.AWS_GITHUB_ACTIONS_ROLE}}" -var="environment=dev-${MODIFIED_BRANCH_NAME}"
