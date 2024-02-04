@@ -30,7 +30,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/./-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -69,7 +69,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/./-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
 
       - name: Download frontend build
         uses: actions/download-artifact@v3
@@ -138,7 +138,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/./-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -175,7 +175,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/./-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
 
       - name: Download backend build
         uses: actions/download-artifact@v3
@@ -222,7 +222,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/./-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1

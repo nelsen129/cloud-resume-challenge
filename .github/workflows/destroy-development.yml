@@ -28,7 +28,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -68,7 +68,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -107,7 +107,7 @@ jobs:
         env:
           name: "${{github.head_ref}}"
         run: |
-          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g')" >> $GITHUB_ENV
+          echo "MODIFIED_BRANCH_NAME=$(echo $name | sed 's/\//-/g;s/_/-/g;s/\./-/g')" >> $GITHUB_ENV
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
