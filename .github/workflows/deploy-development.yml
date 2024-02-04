@@ -46,7 +46,7 @@ jobs:
       - name: Archive frontend code build
         uses: actions/upload-artifact@v3
         with:
-          name: frontend-build-dev-${MODIFIED_BRANCH_NAME}
+          name: "frontend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: frontend/out
 
   development-deploy-frontend:
@@ -74,7 +74,7 @@ jobs:
       - name: Download frontend build
         uses: actions/download-artifact@v3
         with:
-          name: frontend-build-dev-${MODIFIED_BRANCH_NAME}
+          name: "frontend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: frontend/out
 
       - name: Configure aws credentials
@@ -152,7 +152,7 @@ jobs:
       - name: Archive backend code build
         uses: actions/upload-artifact@v3
         with:
-          name: backend-build-dev-${MODIFIED_BRANCH_NAME}
+          name: "backend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: backend/out
 
   development-deploy-backend:
@@ -180,7 +180,7 @@ jobs:
       - name: Download backend build
         uses: actions/download-artifact@v3
         with:
-          name: backend-build-dev-${MODIFIED_BRANCH_NAME}
+          name: "backend-build-dev-${MODIFIED_BRANCH_NAME}"
           path: backend/out
 
       - name: Configure aws credentials
