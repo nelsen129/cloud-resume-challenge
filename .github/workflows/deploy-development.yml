@@ -278,7 +278,7 @@ jobs:
         run: echo "HOSTNAME=$(cat hostname.env)" >> "$GITHUB_ENV"
 
       - name: Cypress run
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
           start: "npx cypress run --config baseUrl=https://${{ env.HOSTNAME }} --headed"
