@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "cypress": "^13.6.4",
     "gray-matter": "^4.0.3",
     "next": "latest",
     "nextra": "^2.0.0-beta.5",

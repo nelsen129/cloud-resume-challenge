@@ -29,3 +29,6 @@ terraform.rc
 # Ignore built output
 frontend/out
 backend/out
+
+# Cypress video output
+frontend/cypress/videos
