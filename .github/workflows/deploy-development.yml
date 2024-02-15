@@ -267,7 +267,7 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
-      - name: Download backend build
+      - name: Download hostname artifact
         uses: actions/download-artifact@v3
         with:
           name: hostname-dev-${{ github.head_ref }}
@@ -281,4 +281,4 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
-          start: "npx cypress run --config baseUrl=https://${{ env.HOSTNAME }} --headed"
+          start: "npx cypress run --config baseUrl=https://${{ env.HOSTNAME }}"
