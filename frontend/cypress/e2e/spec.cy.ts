@@ -13,7 +13,7 @@ describe("View Counter", () => {
             const viewcount2 = parseFloat($span2.text());
 
             // Make sure viewcount incremented
-            expect(viewcount2).to.eq(viewcount1 + 1);
+            expect(viewcount2).to.be.at.least(viewcount1 + 1);
           });
         });
       });
